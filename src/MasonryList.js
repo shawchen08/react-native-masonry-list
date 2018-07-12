@@ -237,6 +237,7 @@ export default class MasonryList extends React.Component<Props, State> {
         {this.state.columns.map(col =>
           <VirtualizedList
             {...props}
+            listKey={(item, index) => item.id + index.toString()}
             ref={ref => (this._listRefs[col.index] = ref)}
             key={`$col_${col.index}`}
             data={col.data}
