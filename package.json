@@ -1,6 +1,6 @@
 {
-  "name": "@appandflow/masonry-list",
-  "version": "0.4.0",
+  "name": "@lewisf/masonry-list",
+  "version": "0.4.2",
   "main": "./src/MasonryList.js",
   "private": false,
   "repository": {
