@@ -1,50 +1,42 @@
 // @flow
 
-import * as React from 'react';
-import {
-  VirtualizedList,
-  View,
-  ScrollView,
-  StyleSheet,
-  findNodeHandle,
-  RefreshControl,
-} from 'react-native';
+import * as React from 'react'
+import { VirtualizedList, View, ScrollView, StyleSheet, findNodeHandle, RefreshControl } from 'react-native'
 
 type Column = {
   index: number,
   totalHeight: number,
   data: Array<any>,
-  heights: Array<number>,
-};
+  heights: Array<number>
+}
 
 const _stateFromProps = ({ numColumns, data, getHeightForItem }) => {
   const columns: Array<Column> = Array.from({
-    length: numColumns,
+    length: numColumns
   }).map((col, i) => ({
     index: i,
     totalHeight: 0,
     data: [],
-    heights: [],
-  }));
+    heights: []
+  }))
 
   data.forEach((item, index) => {
-    const height = getHeightForItem({ item, index });
-    const column = columns.reduce(
-      (prev, cur) => (cur.totalHeight < prev.totalHeight ? cur : prev),
-      columns[0],
-    );
-    column.data.push(item);
-    column.heights.push(height);
-    column.totalHeight += height;
-  });
+    const height = getHeightForItem({ item, index })
+    const column = columns.reduce((prev, cur) => (cur.totalHeight < prev.totalHeight ? cur : prev), columns[0])
+    column.data.push(item)
+    column.heights.push(height)
+    column.totalHeight += height
+  })
 
-  return { columns };
-};
+  return { columns }
+}
 
 export type Props = {
   data: Array<any>,
   numColumns: number,
   renderItem: ({ item: any, index: number, column: number }) => ?React.Element<any>,
+  // allow users to customize their own `getItemLayout`
+  getItemLayout: ({ column: Array<any>, rowIndex: number }) => { length: number, offset: number, index: number },
   getHeightForItem: ({ item: any, index: number }) => number,
   ListHeaderComponent?: ?React.ComponentType<any>,
   ListEmptyComponent?: ?React.ComponentType<any>,
@@ -74,18 +66,18 @@ export type Props = {
    * If provided, a standard RefreshControl will be added for "Pull to Refresh" functionality. Make
    * sure to also set the `refreshing` prop correctly.
    */
-  onRefresh?: ?Function,
-};
+  onRefresh?: ?Function
+}
 type State = {
-  columns: Array<Column>,
-};
+  columns: Array<Column>
+}
 
 // This will get cloned and added a bunch of props that are supposed to be on
 // ScrollView so we wan't to make sure we don't pass them over (especially
 // onLayout since it exists on both).
 class FakeScrollView extends React.Component<{ style?: any, children?: any }> {
   render() {
-    return <View style={this.props.style}>{this.props.children}</View>;
+    return <View style={this.props.style}>{this.props.children}</View>
   }
 }
 
@@ -98,138 +90,136 @@ export default class MasonryList extends React.Component<Props, State> {
         return (
           <ScrollView
             {...props}
-            refreshControl={
-              <RefreshControl refreshing={props.refreshing} onRefresh={props.onRefresh} />
-            }
+            refreshControl={<RefreshControl refreshing={props.refreshing} onRefresh={props.onRefresh} />}
           />
-        );
+        )
       }
-      return <ScrollView {...props} />;
-    },
-  };
+      return <ScrollView {...props} />
+    }
+  }
 
-  state = _stateFromProps(this.props);
-  _listRefs: Array<?VirtualizedList> = [];
-  _scrollRef: ?ScrollView;
-  _endReached = false;
+  state = _stateFromProps(this.props)
+  _listRefs: Array<?VirtualizedList> = []
+  _scrollRef: ?ScrollView
+  _endReached = false
 
-  //TODO: UPDATE to REACT 16.3 req
   UNSAFE_componentWillReceiveProps(newProps: Props) {
-    this.setState(_stateFromProps(newProps));
+    this.setState(_stateFromProps(newProps))
   }
 
   getScrollResponder() {
     if (this._scrollRef && this._scrollRef.getScrollResponder) {
-      return this._scrollRef.getScrollResponder();
+      return this._scrollRef.getScrollResponder()
     }
-    return null;
+    return null
   }
 
   getScrollableNode() {
     if (this._scrollRef && this._scrollRef.getScrollableNode) {
-      return this._scrollRef.getScrollableNode();
+      return this._scrollRef.getScrollableNode()
     }
-    return findNodeHandle(this._scrollRef);
+    return findNodeHandle(this._scrollRef)
   }
 
   scrollToOffset({ offset, animated }: any) {
     if (this._scrollRef) {
-      this._scrollRef.scrollTo({ y: offset, animated });
+      this._scrollRef.scrollTo({ y: offset, animated })
     }
   }
 
-  _onLayout = (event: Object) => {
-    this._listRefs.forEach(list => list && list._onLayout && list._onLayout(event));
-  };
+  _onLayout = event => {
+    this._listRefs.forEach(list => list && list._onLayout && list._onLayout(event))
+  }
 
-  _onContentSizeChange = (width: number, height: number) => {
-    this._listRefs.forEach(
-      list => list && list._onContentSizeChange && list._onContentSizeChange(width, height)
-    );
-  };
+  _onContentSizeChange = (width, height) => {
+    this._listRefs.forEach(list => list && list._onContentSizeChange && list._onContentSizeChange(width, height))
+  }
 
-  _onScroll = (event: Object) => {
+  _onScroll = event => {
     if (this.props.onScroll) {
-      this.props.onScroll(event);
+      this.props.onScroll(event)
     }
-    this._listRefs.forEach(list => list && list._onScroll && list._onScroll(event));
-  };
+    this._listRefs.forEach(list => list && list._onScroll && list._onScroll(event))
+  }
 
-  _onScrollBeginDrag = (event: Object) => {
+  _onScrollBeginDrag = event => {
     if (this.props.onScrollBeginDrag) {
-      this.props.onScrollBeginDrag(event);
+      this.props.onScrollBeginDrag(event)
     }
-    this._listRefs.forEach(
-      list => list && list._onScrollBeginDrag && list._onScrollBeginDrag(event)
-    );
-  };
+    this._listRefs.forEach(list => list && list._onScrollBeginDrag && list._onScrollBeginDrag(event))
+  }
 
-  _onScrollEndDrag = (event: Object) => {
+  _onScrollEndDrag = event => {
     if (this.props.onScrollEndDrag) {
-      this.props.onScrollEndDrag(event);
+      this.props.onScrollEndDrag(event)
     }
-    this._listRefs.forEach(list => list && list._onScrollEndDrag && list._onScrollEndDrag(event));
-  };
+    this._listRefs.forEach(list => list && list._onScrollEndDrag && list._onScrollEndDrag(event))
+  }
 
-  _onMomentumScrollEnd = (event: Object) => {
+  _onMomentumScrollEnd = event => {
     if (this.props.onMomentumScrollEnd) {
-      this.props.onMomentumScrollEnd(event);
+      this.props.onMomentumScrollEnd(event)
     }
-    this._listRefs.forEach(
-      list => list && list._onMomentumScrollEnd && list._onMomentumScrollEnd(event)
-    );
-  };
+    this._listRefs.forEach(list => list && list._onMomentumScrollEnd && list._onMomentumScrollEnd(event))
+  }
 
   _onEndReached = (info: { distanceFromEnd: number }) => {
     if (this._endReached) {
-      return;
+      return
     }
-    this._endReached = true;
+    this._endReached = true
     if (this.props.onEndReached) {
       Promise.resolve(this.props.onEndReached(info)).then(() => {
-        this._endReached = false;
-      });
+        this._endReached = false
+      })
     }
-  };
+  }
 
-  _getItemLayout = (columnIndex: number, rowIndex: number) => {
-    const column = this.state.columns[columnIndex];
-    let offset = 0;
+  _getItemLayout = (columnIndex, rowIndex) => {
+    const column = this.state.columns[columnIndex]
+
+    // fix issue 23 (https://github.com/AppAndFlow/react-native-masonry-list/issues/23)
+    // users can include the item's `padding/margin/borderWidth...` in `offset` calculation
+    if (typeof this.props.getItemLayout === 'function') {
+      return this.props.getItemLayout(column, rowIndex)
+    }
+
+    let offset = 0
     for (let ii = 0; ii < rowIndex; ii += 1) {
-      offset += column.heights[ii];
+      offset += column.heights[ii]
     }
-    return { length: column.heights[rowIndex], offset, index: rowIndex };
-  };
+    return { length: column.heights[rowIndex], offset, index: rowIndex }
+  }
 
-  _renderScrollComponent = () => <FakeScrollView style={styles.column} />;
+  _renderScrollComponent = () => <FakeScrollView style={styles.column} />
 
-  _getItemCount = (data: any[]) => data.length;
+  _getItemCount = data => data.length
 
-  _getItem = (data: any[], index: number) => data[index];
+  _getItem = (data, index) => data[index]
 
-  //$FlowFixMe
-  _captureScrollRef = ref => (this._scrollRef = ref);
+  _captureScrollRef = ref => (this._scrollRef = ref)
 
   render() {
     const {
       renderItem,
+      getItemLayout,
       ListHeaderComponent,
       ListEmptyComponent,
       ListFooterComponent,
       keyExtractor,
       ...props
-    } = this.props;
-    let headerElement;
+    } = this.props
+    let headerElement
     if (ListHeaderComponent) {
-      headerElement = <ListHeaderComponent />;
+      headerElement = <ListHeaderComponent />
     }
-    let emptyElement;
+    let emptyElement
     if (ListEmptyComponent) {
-      emptyElement = <ListEmptyComponent />;
+      emptyElement = <ListEmptyComponent />
     }
-    let footerElement;
+    let footerElement
     if (ListFooterComponent) {
-      footerElement = <ListFooterComponent />;
+      footerElement = <ListFooterComponent />
     }
     const content = (
       <View style={styles.contentContainer}>
@@ -247,12 +237,12 @@ export default class MasonryList extends React.Component<Props, State> {
             renderScrollComponent={this._renderScrollComponent}
             keyExtractor={keyExtractor}
             onEndReached={this._onEndReached}
-            // onEndReachedThreshold={this.props.onEndReachedThreshold}
+            onEndReachedThreshold={this.props.onEndReachedThreshold}
             removeClippedSubviews={false}
           />
         ))}
       </View>
-    );
+    )
 
     const scrollComponent = React.cloneElement(
       this.props.renderScrollComponent(this.props),
@@ -264,22 +254,22 @@ export default class MasonryList extends React.Component<Props, State> {
         onScroll: this._onScroll,
         onScrollBeginDrag: this._onScrollBeginDrag,
         onScrollEndDrag: this._onScrollEndDrag,
-        onMomentumScrollEnd: this._onMomentumScrollEnd,
+        onMomentumScrollEnd: this._onMomentumScrollEnd
       },
       headerElement,
       emptyElement && this.props.data.length === 0 ? emptyElement : content,
       footerElement
-    );
+    )
 
-    return scrollComponent;
+    return scrollComponent
   }
 }
 
 const styles = StyleSheet.create({
   contentContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row'
   },
   column: {
-    flex: 1,
-  },
-});
+    flex: 1
+  }
+})
