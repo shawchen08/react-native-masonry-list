@@ -44,9 +44,9 @@ Take a look at [example folder](https://github.com/AppAndFlow/react-native-mason
 
 - Support measuring items automatically and get rid of `getHeightForItem`.
 
-- Implement onEndReached in a way that it isn't called multiple times.
+- [x] Implement onEndReached in a way that it isn't called multiple times.
 
-- Support FooterComponent.
+- [x] Support FooterComponent.
 
 - Long term, could probably be implemented without using multiple `VirtualizedList`
 to make it more performant and less hacky.

@@ -181,7 +181,7 @@ export default class MasonryList extends React.Component<Props, State> {
     // fix issue 23 (https://github.com/AppAndFlow/react-native-masonry-list/issues/23)
     // users can include the item's `padding/margin/borderWidth...` in `offset` calculation
     if (typeof this.props.getItemLayout === 'function') {
-      return this.props.getItemLayout(column, rowIndex)
+      return this.props.getItemLayout({ column, rowIndex })
     }
 
     let offset = 0
