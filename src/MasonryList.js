@@ -85,12 +85,13 @@ export default class MasonryList extends React.Component<Props, State> {
   static defaultProps = {
     scrollEventThrottle: 50,
     numColumns: 1,
+    progressViewOffset: 0,
     renderScrollComponent: (props: Props) => {
       if (props.onRefresh && props.refreshing != null) {
         return (
           <ScrollView
             {...props}
-            refreshControl={<RefreshControl refreshing={props.refreshing} onRefresh={props.onRefresh} />}
+            refreshControl={<RefreshControl refreshing={props.refreshing} progressViewOffset={props.progressViewOffset} onRefresh={props.onRefresh} />}
           />
         )
       }
@@ -163,6 +164,7 @@ export default class MasonryList extends React.Component<Props, State> {
     this._listRefs.forEach(list => list && list._onMomentumScrollEnd && list._onMomentumScrollEnd(event))
   }
 
+  // Optimize the issue of `onEndReached` triggering twice
   _onEndReached = (info: { distanceFromEnd: number }) => {
     if (this._endReached) {
       return
@@ -175,6 +177,7 @@ export default class MasonryList extends React.Component<Props, State> {
     }
   }
 
+  // Support for custom `getItemLayout`
   _getItemLayout = (columnIndex, rowIndex) => {
     const column = this.state.columns[columnIndex]
 
